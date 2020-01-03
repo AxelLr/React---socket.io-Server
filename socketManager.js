@@ -21,6 +21,7 @@ module.exports = function(socket) {
         
         connectedUsers = [...connectedUsers, newUser ]
 
+        console.log('wawdad')
         socket.join('General')
  
          socket.emit('WELCOME', `Bienvenido/a ${newUser.user}.`)
@@ -68,16 +69,18 @@ module.exports = function(socket) {
 
         const findUser =  connectedUsers.find(user => user.id === socket.id)
 
+        if(findUser) {
         socket.broadcast.to('General').emit('USER_DISCONNECTED', `${findUser.user} se ha desconectado.`)
 
         const newConnectedUsers = connectedUsers.filter((user) => user.id !== socket.id)
         
         connectedUsers = newConnectedUsers
         
-        console.log(connectedUsers)
+        console.log('dissconect')
 
         io.emit('CONNECTED_USERS', connectedUsers)
 
+        }
     })
 }
 
