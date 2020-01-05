@@ -48,21 +48,40 @@ module.exports = function(socket) {
 
         console.log(message)
 
-        const findUser =  connectedUsers.find(USE => USE.id === socket.id)
+        const findSender =  connectedUsers.find(USE => USE.id === socket.id)
+        const findReceiver = connectedUsers.find(USE => USE.id === id)
 
-        const newMessage = {
-            sender: findUser.user,
+        let newMessage
+
+        if(findReceiver) {
+
+         newMessage = {
+            sender: findSender.user,
+            idSender: id,
             receiver: user,
             message,
             createdAt: new Date(),
-            id: socket.id,
+            idReceiver: socket.id,
             readed: false
         }
 
         io.to(id).emit('NEW_PRIVATE_MESSAGE', newMessage )
         io.to(socket.id).emit('NEW_PRIVATE_MESSAGE', newMessage )
         
-        callback()
+        callback() } 
+
+        else {
+            newMessage = {
+                sender: findSender.user,
+                idSender: id,
+                receiver: user,
+                message: 'el usuario no está conectado',
+                createdAt: new Date(),
+                idReceiver: socket.id,
+                readed: false
+            }
+            io.to(socket.id).emit('NEW_PRIVATE_MESSAGE', newMessage)
+        }
     })
 
     socket.on('disconnect', () => {
