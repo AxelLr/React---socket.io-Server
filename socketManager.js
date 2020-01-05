@@ -21,7 +21,6 @@ module.exports = function(socket) {
         
         connectedUsers = [...connectedUsers, newUser ]
 
-        console.log('wawdad')
         socket.join('General')
  
          socket.emit('WELCOME', `Bienvenido/a ${newUser.user}.`)
@@ -36,16 +35,39 @@ module.exports = function(socket) {
         const newMessage = {
             user: userConnected,
             message,
-            id: socket.id
+            id: socket.id,
+            createdAt: new Date()
         }
    
         io.emit('NEW_MESSAGE', newMessage )
-        callback();
+        callback()
 
-        console.log(connectedUsers)
+    })
+
+    socket.on('SEND_PRIVATE_MESSAGE', ( { user, message, id }, callback) => {
+
+        console.log(message)
+
+        const findUser =  connectedUsers.find(USE => USE.id === socket.id)
+
+        const newMessage = {
+            sender: findUser.user,
+            receiver: user,
+            message,
+            createdAt: new Date(),
+            id: socket.id,
+            readed: false
+        }
+
+        io.to(id).emit('NEW_PRIVATE_MESSAGE', newMessage )
+        io.to(socket.id).emit('NEW_PRIVATE_MESSAGE', newMessage )
+        
+        callback()
     })
 
     socket.on('disconnect', () => {
+
+        console.log('dissconect')
        
         const findUser =  connectedUsers.find(user => user.id === socket.id)
 
@@ -76,7 +98,7 @@ module.exports = function(socket) {
         
         connectedUsers = newConnectedUsers
         
-        console.log('dissconect')
+        console.log('USER_LEAVE')
 
         io.emit('CONNECTED_USERS', connectedUsers)
 
